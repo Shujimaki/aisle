@@ -19,9 +19,9 @@ def home():
 def verify_signin():
     users = {"shuji": "123", "maki": "456"}
 
-    username = request.form.get("username").rstrip()
+    username = request.form.get("username").strip()
     print(username)
-    password = request.form.get("password").rstrip()
+    password = request.form.get("password").strip()
     
     print(users.keys())
     if username not in users.keys():
@@ -30,7 +30,12 @@ def verify_signin():
     if users[username] != password:
         return "Incorrect password"
 
-    return render_template("dashboard.html", username=username)
+    return redirect(url_for('dashboard', username=username))
+
+@app.route('/dashboard/<string:username>')
+def dashboard(username):
+    return f"Welcome to my life, {username}"
+    
 
 # add for future login (for chatting with ai)
 @app.route('/signin')
