@@ -1,15 +1,23 @@
 {% extends "base.html" %}
-{% block title %} Sign In {{ super() }} {% endblock %}
+{% block title %} Register {{ super() }} {% endblock %}
 
 {% block body %}
-<h2>Sign In</h2>
-<form action = '/verify_signin' method = "POST">
+<h2>Register</h2>
+<form action = '/register' method = "POST">
     <label for="username">Username: </label>
     <input type="text" id="username" name="username" placeholder="Enter your username here" required>
     <br>
     <label for="password">Password: </label>
     <input type="text" id="password" name="password" placeholder="Enter your password here" required>
     <br>
-    <input type="submit" value="Sign In">
+    <input type="submit" value="Register">
+</form>
+<hr>
+{% if error %}
+    {{ error }}
+{% endif %}
+<hr><br>
+<form action = '/signin' method = "GET">
+    <input type="submit" value="Signin">
 </form>
 {% endblock %}

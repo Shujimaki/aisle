@@ -32,6 +32,8 @@ def verify_signin():
 
     return redirect(url_for('dashboard', username=username))
 
+
+
 @app.route('/dashboard/<string:username>')
 def dashboard(username):
     return f"Welcome to my life, {username}"

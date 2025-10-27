@@ -3,4 +3,8 @@
 
 {% block body %}
 <h2>Welcome, {{username}}</h2>
+<hr><br>
+<form action="/signout" method="GET">
+    <input type="submit" value="Sign Out">
+</form>
 {% endblock %}

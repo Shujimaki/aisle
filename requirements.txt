@@ -1,2 +1,6 @@
 flask
+flask-login
+flask-sqlalchemy
 python-dotenv
+regex
+werkzeug
