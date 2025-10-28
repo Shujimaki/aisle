@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from flask import Blueprint, jsonify
 from flask_cors import CORS, cross_origin
+from urllib.parse import urljoin
 import requests
 from datetime import datetime
 
@@ -52,15 +53,55 @@ def get_earthquakes():
     earthquakes = []
     for table in tables:
         for row in table.select('tr')[1:]:
-            cells = [td.get_text(strip=True) for td in row.select('td')]
+            cells = row.find_all('td')
+            if not cells:
+                continue
+
             if len(cells) == 6:
+
+                date_time_cell = cells[0]
+                latitude_cell = cells[1]
+                longitude_cell = cells[2]
+                depth_cell = cells[3]
+                magnitude_cell = cells[4]
+                location_cell = cells[5]
+
+                # find a tag to get href
+                date_time = date_time_cell.find('a').get_text().strip()
+                a_tag = date_time_cell.find('a')
+                # check if a tag and href exists
+                if a_tag and 'href' in a_tag.attrs:
+                    # get the href value
+                    href = a_tag['href']
+                else:
+                    href = None
+                
+                # if href variable has content, normalize and combine to base url
+                if href:
+                    # replace the \ with /
+                    normalized_path = href.replace('\\','/')
+                    
+                    # combine the base url and normalized path to make a url
+                    try:
+                        detail_link = urljoin(BASE_URL, normalized_path)
+                    except Exception:
+                        detail_link = normalized_path
+
+                latitude = latitude_cell.get_text().strip()
+                longitude = longitude_cell.get_text().strip()
+                depth = depth_cell.get_text().strip()
+                magnitude= magnitude_cell.get_text().strip()
+                location = location_cell.get_text().strip()
+
+
                 earthquakes.append({
-                    "dateTime": cells[0],
-                    "latitude": cells[1],
-                    "longitude": cells[2],
-                    "depth": cells[3],
-                    "magnitude": cells[4],
-                    "location": cells[5]
+                    "date_time": date_time,
+                    "detail_link": detail_link,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "depth": depth,
+                    "magnitude": magnitude,
+                    "location": location
                 })
 
     cached_data = earthquakes
