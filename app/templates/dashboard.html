@@ -7,4 +7,59 @@
 <form action="/signout" method="GET">
     <input type="submit" value="Sign Out">
 </form>
+<hr><br>
+
+<h2>Fetching Earthquake Data Status: {{ data["success"] }}</h2>
+
+{% if data["success"] %}
+<h3>Cached Status: {{ data["cached"] }}</h3>
+<h3>Last Updated: {{ data["last_updated"] }}</h3>
+<br>
+
+    {% if data["data"] %}
+        <table>
+            <thead>
+                <th>Date-Time</th>
+                <th>Detail Link</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Depth</th>
+                <th>Magnitude</th>
+                <th>Location</th>
+                <th>Intensity Report</th>
+            </thead>
+            
+            <tbody>
+            {% for earthquake in data["data"] %}
+                <tr>
+                    <td>{{earthquake.get("date_time")}}</td>
+                    <td>
+                        <a href="{{earthquake.get('detail_link')}}">
+                            {{earthquake.get("detail_link")}}
+                        </a>
+                    </td>
+                    <td>{{earthquake.get("latitude")}}</td>
+                    <td>{{earthquake.get("longitude")}}</td>
+                    <td>{{earthquake.get("depth")}}</td>
+                    <td>
+                        {% if (earthquake.get("magnitude") | int) >= 4 %}
+                            <b>{{earthquake.get("magnitude")}}</b>
+                        {% else %}
+                            {{earthquake.get("magnitude")}}
+                        {% endif %}
+                    </td>
+                    <td>{{earthquake.get("location")}}</td>
+                    <td>{{earthquake.get("intensity")}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Fetching successful, but no earthquakes recently</p>
+    {% endif %}
+
+{% else %}
+    <h3>Error {{ data["error"] }}</h3>
+{% endif %}
+
 {% endblock %}

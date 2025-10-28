@@ -2,7 +2,9 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import Users, db
+from .api.phivolcs import get_earthquakes
 import regex as re
+import json
 
 # contain the routes inside a blueprint
 bp = Blueprint("main", __name__)
@@ -100,7 +102,7 @@ def home():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    
-    return render_template("dashboard.html", username=current_user.username)
+    earthquake_json = get_earthquakes().get_json()
+    return render_template("dashboard.html", username=current_user.username, data=earthquake_json)
     
 
