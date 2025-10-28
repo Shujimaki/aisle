@@ -1,6 +1,10 @@
 flask
+flask-cors
 flask-login
 flask-sqlalchemy
 python-dotenv
 regex
+requests
 werkzeug
+
+bs4

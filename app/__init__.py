@@ -1,7 +1,9 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_login import LoginManager
 from .models import db, Users
 from .routes import bp as main_bp
+from .api.phivolcs import bp as phivolcs_bp
 
 # initialize the login manager that will handle the authentication and authorization
 login_manager = LoginManager()
@@ -29,6 +31,8 @@ def create_app():
     
     # register the main blueprint from routes.py to the application
     app.register_blueprint(main_bp)
+
+    app.register_blueprint(phivolcs_bp)
 
     return app
 
