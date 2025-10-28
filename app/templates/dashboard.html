@@ -26,7 +26,6 @@
                 <th>Depth</th>
                 <th>Magnitude</th>
                 <th>Location</th>
-                <th>Intensity Report</th>
             </thead>
             
             <tbody>
@@ -34,7 +33,13 @@
                 <tr>
                     <td>{{earthquake.get("date_time")}}</td>
                     <td>
-                        <a href="{{earthquake.get('detail_link')}}">
+                        <style>
+                            a:visited{
+                                color:blue;
+                                text-decoration: none;
+                            }
+                        </style>
+                        <a href="{{earthquake.get('detail_link')}}" target="_blank" rel="noopener noreferrer">
                             {{earthquake.get("detail_link")}}
                         </a>
                     </td>
@@ -49,7 +54,6 @@
                         {% endif %}
                     </td>
                     <td>{{earthquake.get("location")}}</td>
-                    <td>{{earthquake.get("intensity")}}</td>
                 </tr>
             {% endfor %}
             </tbody>

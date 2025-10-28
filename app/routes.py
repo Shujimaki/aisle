@@ -102,6 +102,7 @@ def home():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
+    # get json value from api, and typecast to dict
     earthquake_json = get_earthquakes().get_json()
     return render_template("dashboard.html", username=current_user.username, data=earthquake_json)
     

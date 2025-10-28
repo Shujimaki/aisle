@@ -102,6 +102,8 @@ def get_earthquakes():
                         except Exception:
                             detail_link = normalized_path
 
+                    # get_earthquake_additional_info(detail_link)
+
                     # format the rest of the data to string, and remove whitespaces
                     latitude = latitude_cell.get_text().strip()
                     longitude = longitude_cell.get_text().strip()
@@ -141,3 +143,31 @@ def get_earthquakes():
             "message": "Error fetching earthquake data",
             "error": str(e)
         })
+
+
+
+"""
+TODO:
+complete for viewing each earthquake 
+1. Reported Intensity
+2. Expected Damage?
+3. Expected Aftershocks?
+
+
+def get_earthquake_additional_info(detail_link):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': "keep-alive",
+    }
+
+    res = requests.get(detail_link, headers=headers, verify=False, timeout=10)
+    soup = BeautifulSoup(res.text, 'html.parser')
+
+    doc = soup.find_all(text="Reported")
+    print(f"doc: {doc}")
+
+    # parent = doc
+    # print(f"parent: {parent}")
+"""
