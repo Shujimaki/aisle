@@ -1,6 +1,8 @@
+
 from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
+
 from .models import db, Users
 from .routes import bp as main_bp
 
@@ -14,6 +16,7 @@ def load_user(user_id):
 
 # initialize the app variable
 def create_app():
+
     # make app a Flask object and get the configurations
     app = Flask(__name__)
     app.config.from_object("config.DevelopmentConfig")

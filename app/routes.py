@@ -1,10 +1,14 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from markupsafe import Markup
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import Users, db
-from .api.phivolcs import get_earthquakes
+from .services import get_earthquake_view
+from .api.phivolcs import get_all_earthquakes, get_latest_earthquake
+from .api.googleai import generate_summary
 import regex as re
 import json
+
 
 # contain the routes inside a blueprint
 bp = Blueprint("main", __name__)
@@ -103,7 +107,10 @@ def home():
 @login_required
 def dashboard():
     # get json value from api, and typecast to dict
-    earthquake_json = get_earthquakes().get_json()
-    return render_template("dashboard.html", username=current_user.username, data=earthquake_json)
+    earthquake_json = get_latest_earthquake().get_json()
+    earthquake = earthquake_json['data']
+    summary = generate_summary(earthquake)
+    map_view = Markup(get_earthquake_view(earthquake['latitude'], earthquake['longitude']))
+    return render_template("dashboard.html", username=current_user.username, data=earthquake_json, summary=summary, view=map_view)
     
 

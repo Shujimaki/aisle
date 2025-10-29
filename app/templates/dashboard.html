@@ -9,14 +9,34 @@
 </form>
 <hr><br>
 
-<h2>Fetching Earthquake Data Status: {{ data["success"] }}</h2>
+<h2>Fetching Earthquake Data Status: {{ data.get("success") }}</h2>
 
-{% if data["success"] %}
-<h3>Cached Status: {{ data["cached"] }}</h3>
-<h3>Last Updated: {{ data["last_updated"] }}</h3>
-<br>
+{% if data.get("success") %}
+<h3>Cached Status: {{ data.get("cached") }}</h3>
+<h3>Last Updated: {{ data.get("last_updated") }}</h3>
+<hr><br>
 
-    {% if data["data"] %}
+    {% if data.get("data") %}
+        {% set earthquake = data.get("data") %}
+        <h3>Latest Earthquake Bulletin Summary</h4>
+        <h4>{{ summary|safe }}</p>
+
+        <p>For more information, visit the official and detailed log report
+            <a href="{{ earthquake.get('detail_link') }}" target="_blank", rel="noopener noreferrer"> 
+                here
+            </a>
+        </p>
+
+        <h3>View:</h3>
+        {{ view }}
+    {% else %}
+    <p>No latest earthquake data fetched.</p>
+
+    {% endif %}
+
+
+    {% if data.get("data") %}
+    {% set earthquake = data.get("data") %}
         <table>
             <thead>
                 <th>Date-Time</th>
@@ -29,6 +49,48 @@
             </thead>
             
             <tbody>
+                <tr>
+                    <td>{{earthquake.get("date_time")}}</td>
+                    <td>
+                        <style>
+                            a:visited{
+                                color:blue;
+                                text-decoration: none;
+                            }
+                        </style>
+                        <a href="{{earthquake.get('detail_link')}}" target="_blank" rel="noopener noreferrer">
+                            {{earthquake.get("detail_link")}}
+                        </a>
+                    </td>
+                    <td>{{earthquake.get("latitude")}}</td>
+                    <td>{{earthquake.get("longitude")}}</td>
+                    <td>{{earthquake.get("depth")}}</td>
+                    <td>
+                        {% if (earthquake.get("magnitude") | int) >= 4 %}
+                            <b>{{earthquake.get("magnitude")}}</b>
+                        {% else %}
+                            {{earthquake.get("magnitude")}}
+                        {% endif %}
+                    </td>
+                    <td>{{earthquake.get("location")}}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <p>Fetching successful, but no earthquakes recently</p>
+    {% endif %}
+
+{% else %}
+    <h3>Error {{ data.get("error") }}</h3>
+{% endif %}
+
+{% endblock %}
+
+
+
+<!-- commented out (for all earthquakes) -->
+{#
+    <tbody>
             {% for earthquake in data["data"] %}
                 <tr>
                     <td>{{earthquake.get("date_time")}}</td>
@@ -57,13 +119,5 @@
                 </tr>
             {% endfor %}
             </tbody>
-        </table>
-    {% else %}
-        <p>Fetching successful, but no earthquakes recently</p>
-    {% endif %}
-
-{% else %}
-    <h3>Error {{ data["error"] }}</h3>
-{% endif %}
-
-{% endblock %}
+           
+#}

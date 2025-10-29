@@ -14,13 +14,13 @@ def generate_summary(data: dict) -> str:
     response = client.models.generate_content(
         model = "gemini-2.5-flash",
         config=types.GenerateContentConfig(
-            system_instruction="You are a super AI agent that analyzes and translates PHIVOLC's earthquake details " \
+            system_instruction="You are a super AI agent that analyzes and translates PHIVOLCS' earthquake details " \
             "into consumable and easy-to-digest information for Filipinos. You are able to give the" \
             "reports primarily in English, but also in distinct Filipino native languages, per their preferences"
         ),
         contents=
-        "Create a straight-to-the-point (no headers) summary of the specified earthquake, in 3 sentences." \
-        "Afterwards, include 2 simple tips on earthquake safety for affected regions." \
+        "In a 4-sentence paragraph, summarize of the earthquake detail reports, along with" \
+        "2 simple tips on earthquake safety for affected regions (include in the paragraph)" \
         "Earthquake Information:" \
         f"Date and Time: {data["date_time"]}"
         f"Latitude: {data['latitude']}"
@@ -32,9 +32,4 @@ def generate_summary(data: dict) -> str:
 
     return response.text
 
-if __name__ == "__main__":
-    res = generate_summary(
-        {'date_time': '29 October 2025 - 04:22 PM', 'depth': '030', 'detail_link': 'https://earthquake.phivolcs.dost.gov.ph/2025_Earthquake_Information/October/2025_1029_0822_B1.html', 'latitude': '09.65', 'location': '015\n\t\t  km S 15Â° E of General Luna (Surigao Del Norte)', 'longitude': '126.19', 'magnitude': '6.0'}
-    )
-    print(res)
     
