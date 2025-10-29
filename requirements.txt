@@ -2,6 +2,8 @@ flask
 flask-cors
 flask-login
 flask-sqlalchemy
+folium
+google-genai
 python-dotenv
 regex
 requests
