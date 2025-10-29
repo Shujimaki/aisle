@@ -3,9 +3,9 @@ from flask_login import current_user, login_required, login_user, logout_user
 from markupsafe import Markup
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import Users, db
-from .services import get_earthquake_view
+from .services import fetch_earthquake_view
 from .api.phivolcs import get_all_earthquakes, get_latest_earthquake
-from .api.googleai import generate_summary
+from .api.googleai import generate_summary, fetch_summary
 import regex as re
 import json
 
@@ -109,8 +109,8 @@ def dashboard():
     # get json value from api, and typecast to dict
     earthquake_json = get_latest_earthquake().get_json()
     earthquake = earthquake_json['data']
-    summary = generate_summary(earthquake)
-    map_view = Markup(get_earthquake_view(earthquake['latitude'], earthquake['longitude']))
+    summary = fetch_summary(earthquake)
+    map_view = Markup(fetch_earthquake_view(earthquake['latitude'], earthquake['longitude']))
     return render_template("dashboard.html", username=current_user.username, data=earthquake_json, summary=summary, view=map_view)
     
 

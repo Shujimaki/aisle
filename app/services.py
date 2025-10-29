@@ -1,9 +1,10 @@
 import folium
+from .api.caching import Cache
 
-def get_earthquake_view(latitude: int, longitude: int):
+def generate_earthquake_view(latitude: int, longitude: int):
     m = folium.Map(
         location=[latitude, longitude],
-        zoom_start=6
+        zoom_start=7
     )
 
     folium.Marker(
@@ -18,3 +19,13 @@ def get_earthquake_view(latitude: int, longitude: int):
     iframe = m.get_root()._repr_html_()
 
     return iframe
+
+def fetch_earthquake_view(latitude: int, longitude: int):
+    cache = Cache(f"view-{latitude},{longitude}")
+    data = cache.get()
+    if data is not None:
+        return data
+    else:
+        data = generate_earthquake_view(latitude, longitude)
+        cache.set(data)
+        return data
