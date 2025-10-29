@@ -13,31 +13,46 @@ def generate_summary(data: dict) -> dict:
     api_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key=api_key)
 
+    magnitude_condition = (
+        "If the magnitude is 4.0 or higher, include a friendly reminder to check the full bulletin report here: "
+        f"{data['detail_link']}."
+    )
+
+    system_instruction = (
+        "You are an AI assistant that summarizes PHIVOLCS earthquake reports. "
+        "Your tone should be calm, and formal but still easy-to-digest — as if you’re explaining the situation to everyday Filipinos. "
+        "Avoid technical jargon, but keep the facts accurate. Avoid greetings as well -- just straight to the report."
+        "Never use decorations (like bold, italics, headers, or bullets). "
+        "Respond in plain text only."
+    )
+
+    contents = (
+        "TASK:\n"
+        "Summarize the following earthquake information in exactly 5 sentences. "
+        "Make it easy to understand and reassuring in tone. "
+        "Include 2 short, simple, and relevant safety tips for the affected areas. "
+        f"{magnitude_condition}\n\n"
+        "EARTHQUAKE DETAILS:\n"
+        f"- Date and Time: {data['date_time']}\n"
+        f"- Latitude: {data['latitude']}\n"
+        f"- Longitude: {data['longitude']}\n"
+        f"- Depth: {data['depth']}\n"
+        f"- Magnitude: {data['magnitude']}\n"
+        f"- Location: {data['location']}\n"
+    )
+
     try:
         response = client.models.generate_content(
-            model = "gemini-2.5-flash",
-            config=types.GenerateContentConfig(
-                system_instruction="You are a super AI agent that analyzes and translates PHIVOLCS' earthquake details " \
-                "into simple, friendly, consumable and easy-to-digest information for Filipinos. You are able to give the" \
-                "reports primarily in English, but also in distinct Filipino native languages, per their preferences"
-            ),
-            contents=
-            "In a 4-sentence paragraph, summarize of the earthquake detail reports, along with" \
-            "2 simple tips on earthquake safety for affected regions (include in the paragraph)." \
-            "Make sure the tips are appropriate for the situation and severity." \
-            "Earthquake Information:" \
-            f"Date and Time: {data["date_time"]}"
-            f"Latitude: {data['latitude']}"
-            f"Longitude: {data['longitude']}"
-            f"Depth: {data['depth']}"
-            f"Magnitude: {data['magnitude']}"
-            f"Location: {data['location']}"
+            model="gemini-2.0-flash",
+            config=types.GenerateContentConfig(system_instruction=system_instruction),
+            contents=contents
         )
 
         return {
             "success": True,
             "data": response.text
         }
+    
     except Exception as e:
         return {
             "success": False,
@@ -57,4 +72,4 @@ def fetch_summary(earthquake):
         cache.set(data["data"])
         return data["data"]
 
-    return f"Error generating earthquake summary. Please refer to the original bulletin for details. error: {e}"
+    return f"Error generating earthquake summary. Please refer to the original bulletin for details. error: {data['error']}"
