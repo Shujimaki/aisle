@@ -5,8 +5,12 @@ import requests
 from datetime import datetime
 
 # initialize storage for cached data, last fetched time
-cached_data = None
-last_fetch_time = None
+cached_data_all = None
+last_fetch_time_all = None
+
+# separate cache and fetch time for latest earthquake
+cached_data_latest = None
+last_fetch_time_latest = None
 
 # set constant cache duration
 CACHE_DURATION = 10 * 60 # seconds
@@ -14,24 +18,141 @@ CACHE_DURATION = 10 * 60 # seconds
 # set the base url for api calls
 BASE_URL = 'https://earthquake.phivolcs.dost.gov.ph/'
 
-def get_earthquakes():
-    # get global variables for cached_data and last fetched time
-    global cached_data, last_fetch_time
+def get_latest_earthquake():
+    global cached_data_latest, last_fetch_time_latest
+
+    try:
+        now = datetime.now()
+
+        if cached_data_latest and last_fetch_time_latest and (now.second - last_fetch_time_latest.second) < CACHE_DURATION:
+            return jsonify({
+                "success": True,
+                "data": cached_data_latest,
+                "cached": True,
+                "last_updated": last_fetch_time_latest
+            })
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': "keep-alive",
+        }
+
+        res = requests.get(BASE_URL, headers=headers, verify=False, timeout=10)
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        tables = soup.select('table.MsoNormalTable')
+
+        # iterate through tables
+        for table in tables:
+            print(table)
+            print("before row")
+            try:
+                row = table.select('tr')[1]
+            except:
+                continue
+            print(f"after row: {row}")
+            cells = row.find_all('td')
+
+            if not cells:
+                continue
+        
+            if len(cells) != 6:
+                continue
+        
+            date_time_cell = cells[0]
+            latitude_cell = cells[1]
+            longitude_cell = cells[2]
+            depth_cell = cells[3]
+            magnitude_cell = cells[4]
+            location_cell = cells[5]
+
+            # find a tag to get href
+            date_time = date_time_cell.find('a').get_text().strip()
+            a_tag = date_time_cell.find('a')
+            # check if a tag and href exists
+            if a_tag and 'href' in a_tag.attrs:
+                # get the href value
+                href = a_tag['href']
+            else:
+                href = None
+            
+            # if href variable has content, normalize and combine to base url
+            if href:
+                # replace the \ with /
+                normalized_path = href.replace('\\','/')
+                
+                # combine the base url and normalized path to make a url
+                try:
+                    detail_link = urljoin(BASE_URL, normalized_path)
+                except Exception:
+                    detail_link = normalized_path
+
+            # get_earthquake_additional_info(detail_link)
+
+            # format the rest of the data to string, and remove whitespaces
+            latitude = latitude_cell.get_text().strip()
+            longitude = longitude_cell.get_text().strip()
+            depth = depth_cell.get_text().strip()
+            magnitude= magnitude_cell.get_text().strip()
+            location = location_cell.get_text().strip()
+
+            # append all data as dictionary, to earthquake list
+            earthquake ={
+                "date_time": date_time,
+                "detail_link": detail_link,
+                "latitude": latitude,
+                "longitude": longitude,
+                "depth": depth,
+                "magnitude": magnitude,
+                "location": location,
+            }
+        
+        # update cached_data_all to recently fetched data
+        cached_data_latest = earthquake
+        # update last fetched time to current time
+        last_fetch_time_latest = now
+
+        # return json of status indicators, along with data
+        return jsonify({
+            "success": True,
+            "data": earthquake,
+            "cached": False,
+            "last_updated": last_fetch_time_latest
+        })
+    
+    # catch an error
+    except Exception as e:
+        # return json with status indicator, along with error message for debugging
+        return jsonify({
+            "success": False,
+            "message": "Error fetching latest earthquake data",
+            "error": str(e)
+        })
+
+
+
+
+
+def get_all_earthquakes():
+    # get global variables for cached_data_all and last fetched time
+    global cached_data_all, last_fetch_time_all
 
     try:
         # get current time
         now = datetime.now()
         print(f"time {now}")
 
-        # check if cached_data and last_fetch_time has content
+        # check if cached_data_all and last_fetch_time_all has content
         # check if time elapsed between current time and last fetched time is less than cache duration
-        if cached_data and last_fetch_time and (now.second - last_fetch_time.second) < CACHE_DURATION:
+        if cached_data_all and last_fetch_time_all and (now.second - last_fetch_time_all.second) < CACHE_DURATION:
             # if true, return cached data with last updated time
             return jsonify({
                 "success": True,
-                "data": cached_data,
+                "data": cached_data_all,
                 "cached": True,
-                "last_updated": last_fetch_time
+                "last_updated": last_fetch_time_all
             })
 
         print(f"condition done")
@@ -122,17 +243,17 @@ def get_earthquakes():
                         "location": location,
                     })
 
-        # update cached_data to recently fetched data
-        cached_data = earthquakes
+        # update cached_data_all to recently fetched data
+        cached_data_all = earthquakes
         # update last fetched time to current time
-        last_fetch_time = now
+        last_fetch_time_all = now
 
         # return json of status indicators, along with data
         return jsonify({
             "success": True,
             "data": earthquakes,
             "cached": False,
-            "last_updated": last_fetch_time
+            "last_updated": last_fetch_time_all
         })
     
     # catch an error
