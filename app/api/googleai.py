@@ -22,8 +22,14 @@ def generate_summary(data: dict) -> dict:
 
     # set magnitude condition prompt for ai
     magnitude_condition = (
-        "If the magnitude is 4.0 or higher, include a friendly reminder to check the full bulletin report here: "
+        "Only if the magnitude is 4.0 or higher, "
+        "Include 2 short, simple, and relevant safety tips for the affected areas."
+        "Also report the additional details included in the official bulletin report "
         f"{data['detail_link']}."
+        "Additional reports:" \
+        "1. Reported Intensities" \
+        "2. Expected Damages?" \
+        "3. Expected Aftershocks?"
     )
 
     # set the ai's general role and instruction
@@ -41,7 +47,6 @@ def generate_summary(data: dict) -> dict:
         "TASK:\n"
         "Summarize the following earthquake information in exactly 5 sentences. "
         "Make it easy to understand and reassuring in tone. "
-        "Include 2 short, simple, and relevant safety tips for the affected areas. "
         f"{magnitude_condition}\n\n"
         "EARTHQUAKE DETAILS:\n"
         f"- Date and Time: {data['date_time']}\n"
