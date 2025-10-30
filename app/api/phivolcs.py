@@ -113,6 +113,8 @@ def get_latest_earthquake():
             magnitude= magnitude_cell.get_text().strip()
             location = location_cell.get_text().strip()
 
+            additional_info = get_earthquake_additional_info(detail_link)
+            
             # append all data as dictionary, to earthquake list
             earthquake ={
                 "date_time": date_time,
@@ -123,6 +125,8 @@ def get_latest_earthquake():
                 "magnitude": magnitude,
                 "location": location,
             }
+
+            earthquake.update(additional_info)
         
         # update cached_data_all to recently fetched data
         cached_data_latest = earthquake
@@ -316,6 +320,8 @@ def get_earthquake_additional_info(detail_link):
 
         if re.search(r'Reported\s+Intensities\s+:', text):
             reported_intensities = get_info_text(p)
+            if reported_intensities == "":
+                reported_intensities = "None"
             continue
 
         if re.search(r'Expecting\s+Damage\s+:', text):

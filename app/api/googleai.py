@@ -24,9 +24,8 @@ def generate_summary(data: dict) -> dict:
     magnitude_condition = (
         "Only if the magnitude is 4.0 or higher, "
         "Include 2 short, simple, and relevant safety tips for the affected areas."
-        "Also report the additional details included in the official bulletin report "
-        f"{data['detail_link']}."
-        "Additional reports:" \
+        "Also report the additional details included in the official bulletin report"
+        "Additional reports to refer to:" \
         "1. Reported Intensities" \
         "2. Expected Damages?" \
         "3. Expected Aftershocks?"
@@ -55,6 +54,10 @@ def generate_summary(data: dict) -> dict:
         f"- Depth: {data['depth']}\n"
         f"- Magnitude: {data['magnitude']}\n"
         f"- Location: {data['location']}\n"
+        f"- Reported Intensities: {data['reported_intensities']}\n"
+        f"- Expected Damage: {data['expected_damage']}\n"
+        f"- Expected Aftershocks: {data['expected_aftershocks']}\n"
+
     )
 
     try:
