@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from flask import jsonify
 from urllib.parse import urljoin
 import requests
+import re
 from datetime import datetime
 
 # initialize storage for cached data, last fetched time
@@ -294,8 +295,6 @@ complete for viewing each earthquake
 
 
 def get_earthquake_additional_info(detail_link):
-    additional_data = {}
-
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -308,27 +307,41 @@ def get_earthquake_additional_info(detail_link):
 
     paragraphs = soup.find_all("p")
 
-    label = None
-    capture = False
+    reported_intensities = None
+    expected_damage = None
+    expected_aftershocks = None
 
     for p in paragraphs:
         text = p.get_text(strip=True)
 
-        if "Reported" in text:
-            capture = True
-            label = p
-            break
+        if re.search(r'Reported\s+Intensities\s+:', text):
+            reported_intensities = get_info_text(p)
+            continue
 
-    label_parent = label.find_parent("td")
-    report_parent = label_parent.find_next_sibling("td")
-    report = report_parent.find_all("p")
-    reported_intensities = report[0].get_text(strip=True)
-    print(reported_intensities)
+        if re.search(r'Expecting\s+Damage\s+:', text):
+            expected_damage = get_info_text(p)
+            continue
+    
+        if re.search(r'Expecting\s+Aftershocks\s+:', text):
+            expected_aftershocks = get_info_text(p)
+            continue
 
-    additional_data["reported_intensities"] = reported_intensities
+    return ({
+        "reported_intensities": reported_intensities,
+        "expected_damage": expected_damage,
+        "expected_aftershocks": expected_aftershocks
+    })
 
-    # parent = doc
-    # print(f"parent: {parent}")
 
-if __name__ == "__main__":
-    get_earthquake_additional_info("https://earthquake.phivolcs.dost.gov.ph/2025_Earthquake_Information/October/2025_1016_2303_B4F.html")
+def get_info_text(tag) -> str:
+    parent = tag.find_parent("td")
+    parent_sibling = parent.find_next_sibling("td")
+    cousin = parent_sibling.find_all("p")
+    data = cousin[0].get_text(strip=True)
+
+    return data
+
+# for testing of functions
+# if __name__ == "__main__":
+#     data = get_earthquake_additional_info("https://earthquake.phivolcs.dost.gov.ph/2025_Earthquake_Information/October/2025_1030_133142_B1F.html")
+#     print(data)
