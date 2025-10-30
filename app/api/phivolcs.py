@@ -24,7 +24,9 @@ def get_latest_earthquake():
     try:
         now = datetime.now()
 
+        # check if cache for latest earthquake exists
         if cached_data_latest and last_fetch_time_latest and (now.second - last_fetch_time_latest.second) < CACHE_DURATION:
+            # if cache exists, return cached data
             return jsonify({
                 "success": True,
                 "data": cached_data_latest,
@@ -32,6 +34,7 @@ def get_latest_earthquake():
                 "last_updated": last_fetch_time_latest
             })
         
+        # same headers
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -39,9 +42,12 @@ def get_latest_earthquake():
             'Connection': "keep-alive",
         }
 
+        # request http connection with the phivolcs website, refuse ssl connection, timeout after 10 seconds of no connection
         res = requests.get(BASE_URL, headers=headers, verify=False, timeout=10)
+        # use bs4 to parse the response (text form) into html structure
         soup = BeautifulSoup(res.text, "html.parser")
 
+        # select all elements in the html that have css selector of MsoNormalTable
         tables = soup.select('table.MsoNormalTable')
 
         # iterate through tables
@@ -49,18 +55,26 @@ def get_latest_earthquake():
             print(table)
             print("before row")
             try:
+                # only get second row (first row is header)
+                # one row only since we're getting latest earthquake
                 row = table.select('tr')[1]
             except:
                 continue
             print(f"after row: {row}")
+
+            # get all the table data elements of the row
+            # the contents of the td's are the data for the earthquakes
             cells = row.find_all('td')
 
+            # continue to next table if cells is empty
             if not cells:
                 continue
         
+            # continue to next table if # of cells is strictly not 6
             if len(cells) != 6:
                 continue
         
+            # store the cell data 
             date_time_cell = cells[0]
             latitude_cell = cells[1]
             longitude_cell = cells[2]
