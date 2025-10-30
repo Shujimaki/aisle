@@ -287,9 +287,15 @@ complete for viewing each earthquake
 1. Reported Intensity
 2. Expected Damage?
 3. Expected Aftershocks?
+"""
+
+
+
 
 
 def get_earthquake_additional_info(detail_link):
+    additional_data = {}
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -300,9 +306,29 @@ def get_earthquake_additional_info(detail_link):
     res = requests.get(detail_link, headers=headers, verify=False, timeout=10)
     soup = BeautifulSoup(res.text, 'html.parser')
 
-    doc = soup.find_all(text="Reported")
-    print(f"doc: {doc}")
+    paragraphs = soup.find_all("p")
+
+    label = None
+    capture = False
+
+    for p in paragraphs:
+        text = p.get_text(strip=True)
+
+        if "Reported" in text:
+            capture = True
+            label = p
+            break
+
+    label_parent = label.find_parent("td")
+    report_parent = label_parent.find_next_sibling("td")
+    report = report_parent.find_all("p")
+    reported_intensities = report[0].get_text(strip=True)
+    print(reported_intensities)
+
+    additional_data["reported_intensities"] = reported_intensities
 
     # parent = doc
     # print(f"parent: {parent}")
-"""
+
+if __name__ == "__main__":
+    get_earthquake_additional_info("https://earthquake.phivolcs.dost.gov.ph/2025_Earthquake_Information/October/2025_1016_2303_B4F.html")
